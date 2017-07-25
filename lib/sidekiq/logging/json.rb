@@ -48,7 +48,7 @@ module Sidekiq
                 '@message' => "#{message['class']} failed with args #{message['args']}, not retrying."
               }
             else
-              message
+              { '@message' => message }
             end
           else
             result = message.split(" ")
