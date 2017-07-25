@@ -8,14 +8,22 @@ module Sidekiq
       class Logger < Sidekiq::Logging::Pretty
         # Provide a call() method that returns the formatted message.
         def call(severity, time, program_name, message)
+          matches = /^ *(\S+) JID-(.*)$/.match(context)
+          if matches
+            jid = matches[2]
+            worker = matches[1]
+          else
+            jid = nil
+            worker = nil
+          end
           {
             '@timestamp' => time.utc.iso8601,
             '@fields' => {
               :pid => ::Process.pid,
-              :tid => "TID-#{Thread.current.object_id.to_s(36)}",
-              :context => "#{context}",
+              :tid => "#{Thread.current.object_id.to_s(36)}",
               :program_name => program_name,
-              :worker => "#{context}".split(" ")[0]
+              :worker => worker,
+              :jid => jid
             },
             '@type' => 'sidekiq',
             '@status' => nil,
@@ -34,11 +42,13 @@ module Sidekiq
                 '@status' => 'retry',
                 '@message' => "#{message['class']} failed, retrying with args #{message['args']}."
               }
-            else
+            elsif message['class'] && message['args']
               {
                 '@status' => 'dead',
                 '@message' => "#{message['class']} failed with args #{message['args']}, not retrying."
               }
+            else
+              message
             end
           else
             result = message.split(" ")
