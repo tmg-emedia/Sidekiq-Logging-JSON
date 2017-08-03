@@ -33,12 +33,10 @@ module Sidekiq
           }
               
           pm = process_message message
-          if pm['@message'].is_a? String
-            result = result.merge(pm)
-          else
-            result['@fields'][:msg] = pm['@message']
-            result['@message'] = 'see fields'
-          end
+          parsed_msg = pm['@message']
+          pm.delete '@message'
+          result = result.merge pm
+          result['@fields'][:msg] = parsed_msg
 
           result.to_json + "\n"
         end
