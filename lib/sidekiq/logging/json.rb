@@ -36,7 +36,7 @@ module Sidekiq
         def process_message(message)
           case message
           when Exception
-            { '@status' => 'exception', '@message' => message.message }
+            { '@status' => 'exception', 'message' => { 'msg' => message.message } }
           when Hash
             if message["retry"]
               {
@@ -49,11 +49,7 @@ module Sidekiq
                 'message' => { 'msg' => "#{message['class']} failed with args #{message['args']}, not retrying." }
               }
             else
-              if message.is_a?(String)
-                { 'message' => { 'msg' => message } }
-              else
-                { 'message' => message }
-              end
+              { 'message' => message }
             end
           else
             result = message.split(" ")
@@ -62,7 +58,7 @@ module Sidekiq
             {
               '@status' => status[1],                                   # start or done
               '@run_time' => status[1] && result[1] && result[1].to_f,  # run time in seconds
-              '@message' => message
+              'message' => { 'msg' => message }
             }
           end
         end
