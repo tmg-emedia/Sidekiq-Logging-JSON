@@ -41,15 +41,19 @@ module Sidekiq
             if message["retry"]
               {
                 '@status' => 'retry',
-                '@message' => "#{message['class']} failed, retrying with args #{message['args']}."
+                'message' => { 'msg' => "#{message['class']} failed, retrying with args #{message['args']}." }
               }
             elsif message['class'] && message['args']
               {
                 '@status' => 'dead',
-                '@message' => "#{message['class']} failed with args #{message['args']}, not retrying."
+                'message' => { 'msg' => "#{message['class']} failed with args #{message['args']}, not retrying." }
               }
             else
-              { '@message' => message }
+              if message.is_a?(String)
+                { 'message' => { 'msg' => message } }
+              else
+                { 'message' => message }
+              end
             end
           else
             result = message.split(" ")
