@@ -34,7 +34,7 @@ module Sidekiq
               
           pm = process_message message
           parsed_msg = pm['@message']
-          pm.delete '@message'
+          pm['@message'] = 'sidekiq msg'
           result = result.merge pm
           result['@fields'][:msg] = parsed_msg
 
