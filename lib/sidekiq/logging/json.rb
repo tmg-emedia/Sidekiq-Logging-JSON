@@ -36,20 +36,20 @@ module Sidekiq
         def process_message(message)
           case message
           when Exception
-            { '@status' => 'exception', 'msg' => message.message }
+            { '@status' => 'exception', '@msg' => message.message }
           when Hash
             if message["retry"]
               {
                 '@status' => 'retry',
-                'msg' => "#{message['class']} failed, retrying with args #{message['args']}."
+                '@msg' => "#{message['class']} failed, retrying with args #{message['args']}."
               }
             elsif message['class'] && message['args']
               {
                 '@status' => 'dead',
-                'msg' => "#{message['class']} failed with args #{message['args']}, not retrying."
+                '@msg' => "#{message['class']} failed with args #{message['args']}, not retrying."
               }
             else
-              { 'msg' => message }
+              { '@msg' => message }
             end
           else
             result = message.split(" ")
@@ -58,7 +58,7 @@ module Sidekiq
             {
               '@status' => status[1],                                   # start or done
               '@run_time' => status[1] && result[1] && result[1].to_f,  # run time in seconds
-              'msg' => message
+              '@msg' => message
             }
           end
         end
