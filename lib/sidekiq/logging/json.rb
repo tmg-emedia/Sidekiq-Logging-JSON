@@ -26,7 +26,6 @@ module Sidekiq
               :worker => worker,
               :jid => jid
             },
-            '@type' => 'sidekiq',
             '@status' => nil,
             '@severity' => severity,
             '@run_time' => nil,
